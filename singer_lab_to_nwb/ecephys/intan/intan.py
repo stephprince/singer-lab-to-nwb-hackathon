@@ -66,6 +66,11 @@ class Intan2NWB(NWBConverter):
         else:
             electrodes_file = None
 
+        if 'file_geometry' in self.source_paths:
+            geometry_file = Path(self.source_paths['file_geometry']['path'])
+        else:
+            geometry_file = None
+
         def data_gen(source_dir):
             all_files_rhd = list(dir_ecephys_rhd.glob('*.rhd'))
             n_files = len(all_files_rhd)
@@ -89,7 +94,8 @@ class Intan2NWB(NWBConverter):
 
         self.create_electrodes_ecephys(
             all_files_rhd=all_files_rhd,
-            electrodes_file=electrodes_file
+            electrodes_file=electrodes_file,
+            geometry_file=geometry_file
         )
 
         # Gets electrodes info from first rhd file
@@ -124,7 +130,7 @@ class Intan2NWB(NWBConverter):
         )
         self.nwbfile.add_acquisition(ephys_ts)
 
-    def create_electrodes_ecephys(self, all_files_rhd, electrodes_file):
+    def create_electrodes_ecephys(self, all_files_rhd, electrodes_file, geometry_file):
         """
         Parameters
         ----------
@@ -141,13 +147,18 @@ class Intan2NWB(NWBConverter):
         # Electrodes
         if electrodes_file is not None:  # if an electrodes info file was provided
             df_electrodes = pd.read_csv(electrodes_file, index_col='Channel Number')
+            df_geometry = pd.read_csv(geometry_file)
             for idx, elec in enumerate(electrodes_info):
                 elec_name = elec['native_channel_name']
                 elec_group = df_electrodes.loc[elec_name]['electrode_group']
                 elec_imp = df_electrodes.loc[elec_name]['Impedance Magnitude at 1000 Hz (ohms)']
+                coord_x = df_geometry.loc[idx]['X']
+                coord_y = df_geometry.loc[idx]['Y']
                 self.nwbfile.add_electrode(
                     id=idx,
-                    x=np.nan, y=np.nan, z=np.nan,
+                    x=float(coord_x),
+                    y=float(coord_y),
+                    z=np.nan,
                     imp=float(elec_imp),
                     location='location',
                     filtering='none',

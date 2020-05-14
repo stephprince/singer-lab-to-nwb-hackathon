@@ -7,7 +7,7 @@ import yaml
 import os
 
 
-def conversion_function(source_paths, f_nwb, metadata, add_rhd=False, **kwargs):
+def conversion_function(source_paths, f_nwb, metadata, add_rhd=False, **kwargs): #todo: finish this function
     """
     Convert data from a diversity of experiment types to nwb.
 
@@ -28,7 +28,7 @@ def conversion_function(source_paths, f_nwb, metadata, add_rhd=False, **kwargs):
     """
 
     # Source files and directories
-    dir_ecephys_rhd = None
+    dir_ecephys_rhd = None #todo: add extrafilenames
     file_electrodes = None
     for k, v in source_paths.items():
         if v['path'] != '':
